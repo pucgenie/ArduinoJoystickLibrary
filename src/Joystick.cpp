@@ -44,6 +44,7 @@ Joystick_::Joystick_(
     _includeAxisFlags(includeAxisFlags),
     _includeSimulatorFlags(includeSimulatorFlags),
     _hidReportId(hidReportId),
+    _hatSwitchValues(new int16_t[hatSwitchCount]),
     _buttonValues(new uint8_t[BUTTONVALUES_SIZE(buttonCount)]{})
 {
     // Build Joystick HID Report Description
@@ -425,8 +426,7 @@ Joystick_::Joystick_(
 	_accelerator = 0;
 	_brake = 0;
 	_steering = 0;
-	for (int index = 0; index < JOYSTICK_HATSWITCH_COUNT_MAXIMUM; index++)
-	{
+	for (int index = _hatSwitchCount; index --> 0 ;) {
 		_hatSwitchValues[index] = JOYSTICK_HATSWITCH_RELEASE;
 	}
 }
@@ -523,7 +523,10 @@ void Joystick_::setSteering(int32_t value)
 
 void Joystick_::setHatSwitch(int8_t hatSwitchIndex, int16_t value)
 {
-	if (hatSwitchIndex >= _hatSwitchCount) return;
+	if (hatSwitchIndex >= _hatSwitchCount) {
+    // pucgenie: wtf, fails silently
+return;
+  }
 	
 	_hatSwitchValues[hatSwitchIndex] = value;
 	if (_autoSendState) sendState();
@@ -584,17 +587,11 @@ int Joystick_::sendState()
 	if (_hatSwitchCount > 0) {
 		
 		// Calculate hat-switch values
-		uint8_t convertedHatSwitch[JOYSTICK_HATSWITCH_COUNT_MAXIMUM];
-		for (int hatSwitchIndex = 0; hatSwitchIndex < JOYSTICK_HATSWITCH_COUNT_MAXIMUM; hatSwitchIndex++)
-		{
-			if (_hatSwitchValues[hatSwitchIndex] < 0)
-			{
-				convertedHatSwitch[hatSwitchIndex] = 8;
-			}
-			else
-			{
-				convertedHatSwitch[hatSwitchIndex] = (_hatSwitchValues[hatSwitchIndex] % 360) / 45;
-			}			
+		uint8_t convertedHatSwitch[JOYSTICK_HATSWITCH_COUNT_MAXIMUM] {8, 8};
+		for (int hatSwitchIndex = _hatSwitchCount; hatSwitchIndex --> 0 ;) {
+      convertedHatSwitch[hatSwitchIndex] = (_hatSwitchValues[hatSwitchIndex] < 0)
+        ? 8
+        : (_hatSwitchValues[hatSwitchIndex] % 360) / 45;
 		}
 
 		// Pack hat-switch states into a single byte

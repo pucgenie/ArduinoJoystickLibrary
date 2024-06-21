@@ -86,7 +86,6 @@ private:
     int32_t   _accelerator;
     int32_t   _brake;
     int32_t   _steering;
-    int16_t    _hatSwitchValues[JOYSTICK_HATSWITCH_COUNT_MAXIMUM];
 
     // Joystick Settings
     const bool     _autoSendState;
@@ -121,6 +120,7 @@ private:
     uint8_t   _hidReportSize; 
 
     // TODO: VLA?
+    int16_t* const _hatSwitchValues;
     uint8_t* const _buttonValues;
 
 protected:
