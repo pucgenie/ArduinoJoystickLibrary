@@ -87,12 +87,10 @@ private:
     int32_t   _brake;
     int32_t   _steering;
     int16_t    _hatSwitchValues[JOYSTICK_HATSWITCH_COUNT_MAXIMUM];
-    uint8_t   *_buttonValues = NULL;
 
     // Joystick Settings
     const bool     _autoSendState;
     const uint8_t  _buttonCount;
-    uint8_t  _buttonValuesArraySize = 0;
     uint8_t  _hatSwitchCount;
     uint8_t  _includeAxisFlags;
     uint8_t  _includeSimulatorFlags;
@@ -121,6 +119,9 @@ private:
 
     uint8_t   _hidReportId;
     uint8_t   _hidReportSize; 
+
+    // TODO: VLA?
+    uint8_t* const _buttonValues;
 
 protected:
     int buildAndSet16BitValue(bool includeValue, int32_t value, int32_t valueMinimum, int32_t valueMaximum, int32_t actualMinimum, int32_t actualMaximum, uint8_t dataLocation[]);

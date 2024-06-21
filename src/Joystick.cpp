@@ -28,6 +28,8 @@
 #define JOYSTICK_SIMULATOR_MINIMUM 0
 #define JOYSTICK_SIMULATOR_MAXIMUM 65535
 
+#define BUTTONVALUES_SIZE(buttonCount) (buttonCount + 7) / 8
+
 Joystick_::Joystick_(
 	uint8_t hidReportId,
 	uint8_t joystickType,
@@ -35,7 +37,10 @@ Joystick_::Joystick_(
 	uint8_t hatSwitchCount,
 	uint8_t includeAxisFlags,
 	uint8_t includeSimulatorFlags,
-  bool initAutoSendState) : _autoSendState(initAutoSendState), _buttonCount(buttonCount)
+  bool initAutoSendState) :
+    _autoSendState(initAutoSendState),
+    _buttonCount(buttonCount), 
+    _buttonValues(new uint8_t[BUTTONVALUES_SIZE(_buttonCount)]{})
 {
     // Set the USB HID Report ID
     _hidReportId = hidReportId;
@@ -404,13 +409,8 @@ Joystick_::Joystick_(
 	DynamicHIDSubDescriptor * const node = new DynamicHIDSubDescriptor(customHidReportDescriptor, hidReportDescriptorSize, false);
 	DynamicHID().AppendDescriptor(node);
 	
-    // Setup Joystick State
-	if (buttonCount > 0) {
-		_buttonValues = new uint8_t[_buttonValuesArraySize = (_buttonCount + 7) / 8];
-	}
-	
 	// Calculate HID Report Size
-	_hidReportSize = _buttonValuesArraySize;
+	_hidReportSize = BUTTONVALUES_SIZE(_buttonCount);
 	_hidReportSize += (_hatSwitchCount > 0);
 	_hidReportSize += (axisCount * 2);
 	_hidReportSize += (simulationCount * 2);
@@ -431,10 +431,6 @@ Joystick_::Joystick_(
 	{
 		_hatSwitchValues[index] = JOYSTICK_HATSWITCH_RELEASE;
 	}
-    for (int index = 0; index < _buttonValuesArraySize; index++)
-    {
-        _buttonValues[index] = 0;
-    }
 }
 
 void Joystick_::setButton(uint8_t button, uint8_t value)
@@ -581,13 +577,10 @@ int Joystick_::buildAndSetSimulationValue(bool includeValue, int32_t value, int3
 int Joystick_::sendState()
 {
 	uint8_t data[_hidReportSize];
-	int index = 0;
+	int index = BUTTONVALUES_SIZE(_buttonCount);
 	
 	// Load Button State
-	for (; index < _buttonValuesArraySize; index++)
-	{
-		data[index] = _buttonValues[index];		
-	}
+  memcpy(data, _buttonValues, index * sizeof(uint8_t));
 
 	// Set Hat Switch Values
 	if (_hatSwitchCount > 0) {
