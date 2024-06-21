@@ -40,37 +40,35 @@ Joystick_::Joystick_(
   bool initAutoSendState) :
     _autoSendState(initAutoSendState),
     _buttonCount(buttonCount), 
-    _buttonValues(new uint8_t[BUTTONVALUES_SIZE(_buttonCount)]{})
+    _hatSwitchCount(hatSwitchCount),
+    _includeAxisFlags(includeAxisFlags),
+    _includeSimulatorFlags(includeSimulatorFlags),
+    _hidReportId(hidReportId),
+    _buttonValues(new uint8_t[BUTTONVALUES_SIZE(buttonCount)]{})
 {
-    // Set the USB HID Report ID
-    _hidReportId = hidReportId;
-
-    // Save Joystick Settings
-	_hatSwitchCount = hatSwitchCount;
-	_includeAxisFlags = includeAxisFlags;
-	_includeSimulatorFlags = includeSimulatorFlags;
-	
     // Build Joystick HID Report Description
 	
 	// Button Calculations
-	uint8_t buttonsInLastByte = _buttonCount % 8;
-	uint8_t buttonPaddingBits = 0;
-	if (buttonsInLastByte > 0)
+	uint8_t buttonPaddingBits;
 	{
-		buttonPaddingBits = 8 - buttonsInLastByte;
-	}
+    const uint8_t buttonsInLastByte = _buttonCount % 8;
+    buttonPaddingBits = (buttonsInLastByte > 0)
+      ? 8 - buttonsInLastByte
+      : 0;
+  }
 	
 	// Axis Calculations
     uint8_t axisCount = 0;
-    for(int i = 0; i < 8; i++)
-        if(_includeAxisFlags & (int)pow(2, i))
+    for(int i = 1; i != 0; i <<= 1)
+        if(_includeAxisFlags & i)
             axisCount++;
 		
 	uint8_t simulationCount = 0;
-    for(int i = 0; i < 8; i++)
-        if(_includeSimulatorFlags & (int)pow(2, i))
+    for(int i = 1; i != 0; i <<= 1)
+        if(_includeSimulatorFlags & i)
             simulationCount++;
 		
+    // TODO: It's a struct with multiple VLAs. Good luck.
     uint8_t tempHidReportDescriptor[150];
     int hidReportDescriptorSize = 0;
 

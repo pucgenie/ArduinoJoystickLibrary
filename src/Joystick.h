@@ -91,9 +91,9 @@ private:
     // Joystick Settings
     const bool     _autoSendState;
     const uint8_t  _buttonCount;
-    uint8_t  _hatSwitchCount;
-    uint8_t  _includeAxisFlags;
-    uint8_t  _includeSimulatorFlags;
+    const uint8_t  _hatSwitchCount;
+    const uint8_t  _includeAxisFlags;
+    const uint8_t  _includeSimulatorFlags;
     int32_t  _xAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
     int32_t  _xAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
     int32_t  _yAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
@@ -117,7 +117,7 @@ private:
     int32_t  _steeringMinimum = JOYSTICK_DEFAULT_SIMULATOR_MINIMUM;
     int32_t  _steeringMaximum = JOYSTICK_DEFAULT_SIMULATOR_MAXIMUM;
 
-    uint8_t   _hidReportId;
+    const uint8_t   _hidReportId;
     uint8_t   _hidReportSize; 
 
     // TODO: VLA?
