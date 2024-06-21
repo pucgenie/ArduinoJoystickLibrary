@@ -406,11 +406,7 @@ Joystick_::Joystick_(
 	
     // Setup Joystick State
 	if (buttonCount > 0) {
-		_buttonValuesArraySize = _buttonCount / 8;
-		if ((_buttonCount % 8) > 0) {
-			_buttonValuesArraySize++;
-		}
-		_buttonValues = new uint8_t[_buttonValuesArraySize];
+		_buttonValues = new uint8_t[_buttonValuesArraySize = (_buttonCount + 7) / 8];
 	}
 	
 	// Calculate HID Report Size
