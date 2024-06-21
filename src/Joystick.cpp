@@ -30,6 +30,18 @@
 
 #define BUTTONVALUES_SIZE(buttonCount) (buttonCount + 7) / 8
 
+#if 0
+struct Page1 {
+  uint16_t usage_page;
+  uint16_t usage;
+  uint16_t collection;
+  uint16_t report_id;
+};
+struct HidReportDescriptor {
+   struct Page1 page1;
+};
+#endif
+
 Joystick_::Joystick_(
 	uint8_t hidReportId,
 	uint8_t joystickType,
