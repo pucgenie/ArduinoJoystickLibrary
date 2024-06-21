@@ -421,7 +421,7 @@ Joystick_::Joystick_(
 	DynamicHID().AppendDescriptor(node);
 	
 	// Calculate HID Report Size
-	_hidReportSize = BUTTONVALUES_SIZE(_buttonCount);
+	_hidReportSize = 1 + BUTTONVALUES_SIZE(_buttonCount);
 	_hidReportSize += (_hatSwitchCount > 0);
 	_hidReportSize += (axisCount * 2);
 	_hidReportSize += (simulationCount * 2);
@@ -590,10 +590,11 @@ int Joystick_::buildAndSetSimulationValue(bool includeValue, int32_t value, int3
 int Joystick_::sendState()
 {
 	uint8_t data[_hidReportSize];
+  data[0] = _hidReportId;
 	int index = BUTTONVALUES_SIZE(_buttonCount);
 	
 	// Load Button State
-  memcpy(data, _buttonValues, index * sizeof(uint8_t));
+  memcpy(data+1, _buttonValues, index * sizeof(uint8_t));
 
 	// Set Hat Switch Values
 	if (_hatSwitchCount > 0) {
@@ -626,7 +627,7 @@ int Joystick_::sendState()
 	index += buildAndSetSimulationValue(_includeSimulatorFlags & JOYSTICK_INCLUDE_BRAKE, _brake, _brakeMinimum, _brakeMaximum, &(data[index]));
 	index += buildAndSetSimulationValue(_includeSimulatorFlags & JOYSTICK_INCLUDE_STEERING, _steering, _steeringMinimum, _steeringMaximum, &(data[index]));
 
-	return DynamicHID().SendReport(_hidReportId, data, _hidReportSize);
+	return DynamicHID().SendReport(data, _hidReportSize);
 }
 
 #endif

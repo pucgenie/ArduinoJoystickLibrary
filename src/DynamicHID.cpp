@@ -94,12 +94,9 @@ void DynamicHID_::AppendDescriptor(DynamicHIDSubDescriptor *node)
 	descriptorSize += node->length;
 }
 
-int DynamicHID_::SendReport(uint8_t id, const void* data, int len)
+int DynamicHID_::SendReport(const void* data, int len)
 {
-	uint8_t p[len + 1];
-	p[0] = id;
-	memcpy(&p[1], data, len);
-	return USB_Send(pluggedEndpoint | TRANSFER_RELEASE, p, len + 1);
+	return USB_Send(pluggedEndpoint | TRANSFER_RELEASE, data, len);
 }
 
 bool DynamicHID_::setup(USBSetup& setup)
