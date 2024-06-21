@@ -33,14 +33,14 @@ Joystick_::Joystick_(
 	uint8_t joystickType,
     uint8_t buttonCount,
 	uint8_t hatSwitchCount,
-	uint8_t includeAxisFlags = 255,
-	uint8_t includeSimulatorFlags = 255)
+	uint8_t includeAxisFlags,
+	uint8_t includeSimulatorFlags,
+  bool initAutoSendState) : _autoSendState(initAutoSendState), _buttonCount(buttonCount)
 {
     // Set the USB HID Report ID
     _hidReportId = hidReportId;
 
     // Save Joystick Settings
-    _buttonCount = buttonCount;
 	_hatSwitchCount = hatSwitchCount;
 	_includeAxisFlags = includeAxisFlags;
 	_includeSimulatorFlags = includeSimulatorFlags;
@@ -397,11 +397,11 @@ Joystick_::Joystick_(
     tempHidReportDescriptor[hidReportDescriptorSize++] = 0xc0;
 
 	// Create a copy of the HID Report Descriptor template that is just the right size
-	uint8_t *customHidReportDescriptor = new uint8_t[hidReportDescriptorSize];
+	uint8_t * const customHidReportDescriptor = new uint8_t[hidReportDescriptorSize];
 	memcpy(customHidReportDescriptor, tempHidReportDescriptor, hidReportDescriptorSize);
 	
 	// Register HID Report Description
-	DynamicHIDSubDescriptor *node = new DynamicHIDSubDescriptor(customHidReportDescriptor, hidReportDescriptorSize, false);
+	DynamicHIDSubDescriptor * const node = new DynamicHIDSubDescriptor(customHidReportDescriptor, hidReportDescriptorSize, false);
 	DynamicHID().AppendDescriptor(node);
 	
     // Setup Joystick State
@@ -441,9 +441,8 @@ Joystick_::Joystick_(
     }
 }
 
-int Joystick_::begin(bool initAutoSendState)
+int Joystick_::begin()
 {
-	_autoSendState = initAutoSendState;
 	return sendState();
 }
 

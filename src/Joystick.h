@@ -21,7 +21,7 @@
 #ifndef JOYSTICK_h
 #define JOYSTICK_h
 
-#include "DynamicHID/DynamicHID.h"
+#include "DynamicHID.h"
 
 #if ARDUINO < 10606
 #error The Joystick library requires Arduino IDE 1.6.6 or greater. Please update your IDE.
@@ -90,8 +90,8 @@ private:
     uint8_t   *_buttonValues = NULL;
 
     // Joystick Settings
-    bool     _autoSendState;
-    uint8_t  _buttonCount;
+    const bool     _autoSendState;
+    const uint8_t  _buttonCount;
     uint8_t  _buttonValuesArraySize = 0;
     uint8_t  _hatSwitchCount;
     uint8_t  _includeAxisFlags;
@@ -134,9 +134,10 @@ public:
         uint8_t buttonCount = JOYSTICK_DEFAULT_BUTTON_COUNT,
         uint8_t hatSwitchCount = JOYSTICK_DEFAULT_HATSWITCH_COUNT,
         uint8_t includeAxisFlags = 255,
-        uint8_t includeSimulatorFlags = 255);
+        uint8_t includeSimulatorFlags = 255,
+        bool initAutoSendState = false);
 
-    int begin(bool initAutoSendState = true);
+    int begin();
     void end();
     
     // Set Range Functions
