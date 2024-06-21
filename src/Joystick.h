@@ -136,7 +136,7 @@ public:
         uint8_t includeAxisFlags = 255,
         uint8_t includeSimulatorFlags = 255);
 
-    void begin(bool initAutoSendState = true);
+    int begin(bool initAutoSendState = true);
     void end();
     
     // Set Range Functions
@@ -217,7 +217,7 @@ public:
 
     void setHatSwitch(int8_t hatSwitch, int16_t value);
 
-    void sendState();
+    int sendState();
 };
 
 #endif // !defined(_USING_DYNAMIC_HID)

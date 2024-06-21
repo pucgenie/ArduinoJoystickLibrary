@@ -441,10 +441,10 @@ Joystick_::Joystick_(
     }
 }
 
-void Joystick_::begin(bool initAutoSendState)
+int Joystick_::begin(bool initAutoSendState)
 {
 	_autoSendState = initAutoSendState;
-	sendState();
+	return sendState();
 }
 
 void Joystick_::end()
@@ -592,7 +592,7 @@ int Joystick_::buildAndSetSimulationValue(bool includeValue, int32_t value, int3
 	return buildAndSet16BitValue(includeValue, value, valueMinimum, valueMaximum, JOYSTICK_SIMULATOR_MINIMUM, JOYSTICK_SIMULATOR_MAXIMUM, dataLocation);
 }
 
-void Joystick_::sendState()
+int Joystick_::sendState()
 {
 	uint8_t data[_hidReportSize];
 	int index = 0;
@@ -640,7 +640,7 @@ void Joystick_::sendState()
 	index += buildAndSetSimulationValue(_includeSimulatorFlags & JOYSTICK_INCLUDE_BRAKE, _brake, _brakeMinimum, _brakeMaximum, &(data[index]));
 	index += buildAndSetSimulationValue(_includeSimulatorFlags & JOYSTICK_INCLUDE_STEERING, _steering, _steeringMinimum, _steeringMaximum, &(data[index]));
 
-	DynamicHID().SendReport(_hidReportId, data, _hidReportSize);
+	return DynamicHID().SendReport(_hidReportId, data, _hidReportSize);
 }
 
 #endif
