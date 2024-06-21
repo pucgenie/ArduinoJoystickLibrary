@@ -441,15 +441,6 @@ Joystick_::Joystick_(
     }
 }
 
-int Joystick_::begin()
-{
-	return sendState();
-}
-
-void Joystick_::end()
-{
-}
-
 void Joystick_::setButton(uint8_t button, uint8_t value)
 {
 	if (value == 0)

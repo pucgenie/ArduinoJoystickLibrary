@@ -136,9 +136,6 @@ public:
         uint8_t includeAxisFlags = 255,
         uint8_t includeSimulatorFlags = 255,
         bool initAutoSendState = false);
-
-    int begin();
-    void end();
     
     // Set Range Functions
     inline void setXAxisRange(int32_t minimum, int32_t maximum)
