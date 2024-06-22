@@ -103,7 +103,11 @@ return false;
 
 int DynamicHID_::SendReport(const void* data, int len)
 {
-	return USB_Send(pluggedEndpoint | TRANSFER_RELEASE, data, len);
+	#ifdef USBCore_HAS_SEND2
+		return USB_Send2(pluggedEndpoint | TRANSFER_RELEASE, data, len, 9);
+	#else
+		return USB_Send(pluggedEndpoint | TRANSFER_RELEASE, data, len);
+	#endif
 }
 
 bool DynamicHID_::setup(USBSetup& setup)

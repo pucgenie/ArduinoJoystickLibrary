@@ -42,6 +42,15 @@ struct HidReportDescriptor {
 };
 #endif
 
+#ifndef Joystick_DISABLE_AXISES
+	static uint_fast8_t getBitCounts(int8_t includeFlags) {
+		uint_fast8_t ret = 0;
+		for (int i = 1; i != 0; i <<= 1)
+			if (includeFlags & i)
+					++ret;
+		return ret;
+	}
+#endif
 
 Joystick_::Joystick_(
 	const uint8_t buttonCount
@@ -70,6 +79,11 @@ Joystick_::Joystick_(
 		_buttonCount(buttonCount)
 {
 	#ifndef Joystick_DATA_SIZE
+
+		#ifndef Joystick_DISABLE_AXISES
+			const uint8_t axisCount = getBitCounts(_includeAxisFlags), simulationCount = getBitCounts(_includeSimulatorFlags);
+		#endif
+
 		// Calculate HID Report Size
 		_hidReportSize = 1 + BUTTONVALUES_SIZE(_buttonCount);
 		#ifndef Joystick_DISABLE_HATSWITCH
@@ -79,7 +93,7 @@ Joystick_::Joystick_(
 			_hidReportSize += axisCount * sizeof(uint16_t);
 			_hidReportSize += simulationCount * sizeof(uint16_t);
 		#endif
-		_data = new uint8_t[_hidReportSize];
+		_data = new uint8_t[_hidReportSize]{0};
 	#endif
 	
 	#ifndef Joystick_DISABLE_AXISES
@@ -108,26 +122,8 @@ bool Joystick_::begin(const uint8_t hidReportId, const uint8_t joystickType) {
 	// Build Joystick HID Report Description
 	_data[0] = hidReportId;
 
-	// Button Calculations
-	uint8_t buttonPaddingBits;
-	{
-		const uint8_t buttonsInLastByte = _buttonCount % 8;
-		buttonPaddingBits = (buttonsInLastByte > 0)
-		? 8 - buttonsInLastByte
-		: 0;
-	}
-
 	#ifndef Joystick_DISABLE_AXISES
-		// Axis Calculations
-		uint8_t axisCount = 0;
-		for (int i = 1; i != 0; i <<= 1)
-			if (_includeAxisFlags & i)
-					axisCount++;
-			
-		uint8_t simulationCount = 0;
-		for (int i = 1; i != 0; i <<= 1)
-			if (_includeSimulatorFlags & i)
-					simulationCount++;
+		const uint8_t axisCount = getBitCounts(_includeAxisFlags), simulationCount = getBitCounts(_includeSimulatorFlags);
 	#endif
 
 	// TODO: It's a struct with multiple VLAs. Good luck.
@@ -192,22 +188,24 @@ bool Joystick_::begin(const uint8_t hidReportId, const uint8_t joystickType) {
 		tempHidReportDescriptor[hidReportDescriptorSize++] = 0x81;
 		tempHidReportDescriptor[hidReportDescriptorSize++] = 0x02;
 
-		if (buttonPaddingBits > 0) {
-			
-			// REPORT_SIZE (1)
-			tempHidReportDescriptor[hidReportDescriptorSize++] = 0x75;
-			tempHidReportDescriptor[hidReportDescriptorSize++] = 0x01;
+		// Button Calculations
+		{
+			const uint8_t buttonsInLastByte = _buttonCount % 8;
+			if (buttonsInLastByte != 0) {
+				// REPORT_SIZE (1)
+				tempHidReportDescriptor[hidReportDescriptorSize++] = 0x75;
+				tempHidReportDescriptor[hidReportDescriptorSize++] = 0x01;
 
-			// REPORT_COUNT (# of padding bits)
-			tempHidReportDescriptor[hidReportDescriptorSize++] = 0x95;
-			tempHidReportDescriptor[hidReportDescriptorSize++] = buttonPaddingBits;
-					
-			// INPUT (Const,Var,Abs)
-			tempHidReportDescriptor[hidReportDescriptorSize++] = 0x81;
-			tempHidReportDescriptor[hidReportDescriptorSize++] = 0x03;
-			
-		} // Padding Bits Needed
-
+				// REPORT_COUNT (# of padding bits)
+				tempHidReportDescriptor[hidReportDescriptorSize++] = 0x95;
+				tempHidReportDescriptor[hidReportDescriptorSize++] = 8 - buttonsInLastByte;
+						
+				// INPUT (Const,Var,Abs)
+				tempHidReportDescriptor[hidReportDescriptorSize++] = 0x81;
+				tempHidReportDescriptor[hidReportDescriptorSize++] = 0x03;
+				
+			} // Padding Bits Needed
+		}
 	} // Buttons
 
 	if (
@@ -453,7 +451,7 @@ bool Joystick_::begin(const uint8_t hidReportId, const uint8_t joystickType) {
 			tempHidReportDescriptor[hidReportDescriptorSize++] = 0xC5;
 		}
 
-		if (_includeSimulatorFlags & JOYnew DynamicHIDSubDescriptor(customHidReportDescriptor, hidReportDescriptorSize, false)STICK_INCLUDE_STEERING) {
+		if (_includeSimulatorFlags & JOYSTICK_INCLUDE_STEERING) {
 			// USAGE (Steering)
 			tempHidReportDescriptor[hidReportDescriptorSize++] = 0x09;
 			tempHidReportDescriptor[hidReportDescriptorSize++] = 0xC8;
@@ -480,6 +478,7 @@ bool Joystick_::begin(const uint8_t hidReportId, const uint8_t joystickType) {
 	// Register HID Report Description
 	if (!DynamicHID().AppendDescriptor(hidDescObj)) {
 		delete hidDescObj;
+		delete customHidReportDescriptor;
 return false;
 	}
 	return true;
@@ -662,7 +661,9 @@ uint8_t Joystick_::buildAndSetSimulationValue(bool includeValue, int32_t value, 
 
 int Joystick_::sendState()
 {
-	int index = BUTTONVALUES_SIZE(_buttonCount);
+	#if !defined(Joystick_DISABLE_AXISES) || !defined(Joystick_DISABLE_HATSWITCH)
+		int index = 1 + BUTTONVALUES_SIZE(_buttonCount);
+	#endif
 
 	#ifndef Joystick_DISABLE_HATSWITCH
 		// Set Hat Switch Values
