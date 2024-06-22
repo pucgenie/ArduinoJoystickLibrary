@@ -141,8 +141,6 @@ class Joystick_ {
 
 	public:
 		Joystick_(
-			uint8_t hidReportId = JOYSTICK_DEFAULT_REPORT_ID,
-			uint8_t joystickType = JOYSTICK_TYPE_JOYSTICK,
 			uint8_t buttonCount = JOYSTICK_DEFAULT_BUTTON_COUNT
 			#ifndef Joystick_DISABLE_HATSWITCH
 			, uint8_t hatSwitchCount = JOYSTICK_DEFAULT_HATSWITCH_COUNT
@@ -154,7 +152,9 @@ class Joystick_ {
 			#ifndef Joystick_DISABLE_AUTOSEND
 			, bool initAutoSendState = false
 			#endif
-			);
+		);
+		
+		bool begin(uint8_t hidReportId = JOYSTICK_DEFAULT_REPORT_ID, const uint8_t joystickType = JOYSTICK_TYPE_JOYSTICK);
 
 		#ifndef Joystick_DISABLE_AXISES
 			// Set Range Functions
