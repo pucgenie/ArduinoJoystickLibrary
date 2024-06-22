@@ -80,8 +80,15 @@ uint8_t DynamicHID_::getShortName(char *name)
 	return 5;
 }
 
-void DynamicHID_::AppendDescriptor(DynamicHIDSubDescriptor *node)
+bool DynamicHID_::AppendDescriptor(DynamicHIDSubDescriptor *node)
 {
+	const auto oldDescriptorSize = descriptorSize;
+	descriptorSize += node->length;
+	if (oldDescriptorSize > descriptorSize) {
+		// overflow! Rollback changes.
+		descriptorSize = oldDescriptorSize;
+return false;
+	}
 	if (!rootNode) {
 		rootNode = node;
 	} else {
@@ -91,7 +98,7 @@ void DynamicHID_::AppendDescriptor(DynamicHIDSubDescriptor *node)
 		}
 		current->next = node;
 	}
-	descriptorSize += node->length;
+	return true;
 }
 
 int DynamicHID_::SendReport(const void* data, int len)
@@ -156,11 +163,6 @@ DynamicHID_::DynamicHID_(void) : PluggableUSBModule(1, 1, epType),
 {
 	epType[0] = EP_TYPE_INTERRUPT_IN;
 	PluggableUSB().plug(this);
-}
-
-int DynamicHID_::begin(void)
-{
-	return 0;
 }
 
 #endif /* if defined(USBCON) */

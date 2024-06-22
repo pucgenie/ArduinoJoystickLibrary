@@ -2,6 +2,7 @@
   Joystick.h
 
   Copyright (c) 2015-2017, Matthew Heironimus
+  Minimize-ability 2024, pucgenie
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -21,16 +22,19 @@
 #ifndef JOYSTICK_h
 #define JOYSTICK_h
 
+#if __has_include("Joystick.override.h") // no global searchpath for overrides
+#	include "Joystick.override.h"
+#endif
 #include "DynamicHID.h"
 
 #if ARDUINO < 10606
-#error The Joystick library requires Arduino IDE 1.6.6 or greater. Please update your IDE.
+#	error The Joystick library requires Arduino IDE 1.6.6 or greater. Please update your IDE.
 #endif // ARDUINO < 10606
 
 #if ARDUINO > 10606
-#if !defined(USBCON)
-#error The Joystick library can only be used with a USB MCU (e.g. Arduino Leonardo, Arduino Micro, etc.).
-#endif // !defined(USBCON)
+#	if !defined(USBCON)
+#		error The Joystick library can only be used with a USB MCU (e.g. Arduino Leonardo, Arduino Micro, etc.).
+#	endif // !defined(USBCON)
 #endif // ARDUINO > 10606
 
 #if !defined(_USING_DYNAMIC_HID)
@@ -70,153 +74,170 @@
 
 #define JOYSTICK_INCLUDE_NONE 0
 
-class Joystick_
-{
-private:
+class Joystick_ {
+	private:
 
-    // Joystick State
-    int32_t   _xAxis;
-    int32_t   _yAxis;
-    int32_t   _zAxis;
-    int32_t   _xAxisRotation;
-    int32_t   _yAxisRotation;
-    int32_t   _zAxisRotation;
-    int32_t   _throttle;
-    int32_t   _rudder;
-    int32_t   _accelerator;
-    int32_t   _brake;
-    int32_t   _steering;
+		#ifndef Joystick_DISABLE_AXISES
+		// Joystick State
+			int32_t   _xAxis;
+			int32_t   _yAxis;
+			int32_t   _zAxis;
+			int32_t   _xAxisRotation;
+			int32_t   _yAxisRotation;
+			int32_t   _zAxisRotation;
+			int32_t   _throttle;
+			int32_t   _rudder;
+			int32_t   _accelerator;
+			int32_t   _brake;
+			int32_t   _steering;
+		#endif
+		// Joystick Settings
+		#ifndef Joystick_DISABLE_AUTOSEND
+			const bool     _autoSendState;
+		#endif
+		#ifndef Joystick_DISABLE_AXISES
+			const uint8_t  _includeAxisFlags;
+			const uint8_t  _includeSimulatorFlags;
+			int32_t  _xAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
+			int32_t  _xAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
+			int32_t  _yAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
+			int32_t  _yAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
+			int32_t  _zAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
+			int32_t  _zAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
+			int32_t  _rxAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
+			int32_t  _rxAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
+			int32_t  _ryAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
+			int32_t  _ryAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
+			int32_t  _rzAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
+			int32_t  _rzAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
+			int32_t  _rudderMinimum = JOYSTICK_DEFAULT_SIMULATOR_MINIMUM;
+			int32_t  _rudderMaximum = JOYSTICK_DEFAULT_SIMULATOR_MAXIMUM;
+			int32_t  _throttleMinimum = JOYSTICK_DEFAULT_SIMULATOR_MINIMUM;
+			int32_t  _throttleMaximum = JOYSTICK_DEFAULT_SIMULATOR_MAXIMUM;
+			int32_t  _acceleratorMinimum = JOYSTICK_DEFAULT_SIMULATOR_MINIMUM;
+			int32_t  _acceleratorMaximum = JOYSTICK_DEFAULT_SIMULATOR_MAXIMUM;
+			int32_t  _brakeMinimum = JOYSTICK_DEFAULT_SIMULATOR_MINIMUM;
+			int32_t  _brakeMaximum = JOYSTICK_DEFAULT_SIMULATOR_MAXIMUM;
+			int32_t  _steeringMinimum = JOYSTICK_DEFAULT_SIMULATOR_MINIMUM;
+			int32_t  _steeringMaximum = JOYSTICK_DEFAULT_SIMULATOR_MAXIMUM;
+		#endif
+		#ifndef Joystick_DISABLE_HATSWITCH
+			const uint8_t  _hatSwitchCount;
+			int16_t* const _hatSwitchValues;
+		#endif
+		const uint8_t  _buttonCount;
+		#ifdef Joystick_DATA_SIZE
+			uint8_t _data[Joystick_DATA_SIZE];
+		#else
+			uint8_t* _data;
+			uint8_t _hidReportSize;
+		#endif
+ 
 
-    // Joystick Settings
-    const bool     _autoSendState;
-    const uint8_t  _buttonCount;
-    const uint8_t  _hatSwitchCount;
-    const uint8_t  _includeAxisFlags;
-    const uint8_t  _includeSimulatorFlags;
-    int32_t  _xAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
-    int32_t  _xAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
-    int32_t  _yAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
-    int32_t  _yAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
-    int32_t  _zAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
-    int32_t  _zAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
-    int32_t  _rxAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
-    int32_t  _rxAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
-    int32_t  _ryAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
-    int32_t  _ryAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
-    int32_t  _rzAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
-    int32_t  _rzAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
-    int32_t  _rudderMinimum = JOYSTICK_DEFAULT_SIMULATOR_MINIMUM;
-    int32_t  _rudderMaximum = JOYSTICK_DEFAULT_SIMULATOR_MAXIMUM;
-    int32_t  _throttleMinimum = JOYSTICK_DEFAULT_SIMULATOR_MINIMUM;
-    int32_t  _throttleMaximum = JOYSTICK_DEFAULT_SIMULATOR_MAXIMUM;
-    int32_t  _acceleratorMinimum = JOYSTICK_DEFAULT_SIMULATOR_MINIMUM;
-    int32_t  _acceleratorMaximum = JOYSTICK_DEFAULT_SIMULATOR_MAXIMUM;
-    int32_t  _brakeMinimum = JOYSTICK_DEFAULT_SIMULATOR_MINIMUM;
-    int32_t  _brakeMaximum = JOYSTICK_DEFAULT_SIMULATOR_MAXIMUM;
-    int32_t  _steeringMinimum = JOYSTICK_DEFAULT_SIMULATOR_MINIMUM;
-    int32_t  _steeringMaximum = JOYSTICK_DEFAULT_SIMULATOR_MAXIMUM;
+	protected:
+		uint8_t buildAndSet16BitValue(bool includeValue, int32_t value, int32_t valueMinimum, int32_t valueMaximum, int32_t actualMinimum, int32_t actualMaximum, uint8_t dataLocation[]);
+		uint8_t buildAndSetAxisValue(bool includeAxis, int32_t axisValue, int32_t axisMinimum, int32_t axisMaximum, uint8_t dataLocation[]);
+		uint8_t buildAndSetSimulationValue(bool includeValue, int32_t value, int32_t valueMinimum, int32_t valueMaximum, uint8_t dataLocation[]);
 
-    const uint8_t   _hidReportId;
-    uint8_t   _hidReportSize; 
+	public:
+		Joystick_(
+			uint8_t hidReportId = JOYSTICK_DEFAULT_REPORT_ID,
+			uint8_t joystickType = JOYSTICK_TYPE_JOYSTICK,
+			uint8_t buttonCount = JOYSTICK_DEFAULT_BUTTON_COUNT
+			#ifndef Joystick_DISABLE_HATSWITCH
+			, uint8_t hatSwitchCount = JOYSTICK_DEFAULT_HATSWITCH_COUNT
+			#endif
+			#ifndef Joystick_DISABLE_AXISES
+			, uint8_t includeAxisFlags = 255,
+			uint8_t includeSimulatorFlags = 255
+			#endif
+			#ifndef Joystick_DISABLE_AUTOSEND
+			, bool initAutoSendState = false
+			#endif
+			);
 
-    // TODO: VLA?
-    int16_t* const _hatSwitchValues;
-    uint8_t* const _buttonValues;
+		#ifndef Joystick_DISABLE_AXISES
+			// Set Range Functions
+			inline void setXAxisRange(const int32_t minimum, const int32_t maximum)
+			{
+				_xAxisMinimum = minimum;
+				_xAxisMaximum = maximum;
+			}
+			inline void setYAxisRange(const int32_t minimum, const int32_t maximum)
+			{
+				_yAxisMinimum = minimum;
+				_yAxisMaximum = maximum;
+			}
+			inline void setZAxisRange(const int32_t minimum, const int32_t maximum)
+			{
+				_zAxisMinimum = minimum;
+				_zAxisMaximum = maximum;
+			}
+			inline void setRxAxisRange(const int32_t minimum, const int32_t maximum)
+			{
+				_rxAxisMinimum = minimum;
+				_rxAxisMaximum = maximum;
+			}
+			inline void setRyAxisRange(const int32_t minimum, const int32_t maximum)
+			{
+				_ryAxisMinimum = minimum;
+				_ryAxisMaximum = maximum;
+			}
+			inline void setRzAxisRange(const int32_t minimum, const int32_t maximum)
+			{
+				_rzAxisMinimum = minimum;
+				_rzAxisMaximum = maximum;
+			}
+			inline void setRudderRange(const int32_t minimum, const int32_t maximum)
+			{
+				_rudderMinimum = minimum;
+				_rudderMaximum = maximum;
+			}
+			inline void setThrottleRange(const int32_t minimum, const int32_t maximum)
+			{
+				_throttleMinimum = minimum;
+				_throttleMaximum = maximum;
+			}
+			inline void setAcceleratorRange(const int32_t minimum, const int32_t maximum)
+			{
+				_acceleratorMinimum = minimum;
+				_acceleratorMaximum = maximum;
+			}
+			inline void setBrakeRange(const int32_t minimum, const int32_t maximum)
+			{
+				_brakeMinimum = minimum;
+				_brakeMaximum = maximum;
+			}
+			inline void setSteeringRange(const int32_t minimum, const int32_t maximum)
+			{
+				_steeringMinimum = minimum;
+				_steeringMaximum = maximum;
+			}
 
-protected:
-    int buildAndSet16BitValue(bool includeValue, int32_t value, int32_t valueMinimum, int32_t valueMaximum, int32_t actualMinimum, int32_t actualMaximum, uint8_t dataLocation[]);
-    int buildAndSetAxisValue(bool includeAxis, int32_t axisValue, int32_t axisMinimum, int32_t axisMaximum, uint8_t dataLocation[]);
-    int buildAndSetSimulationValue(bool includeValue, int32_t value, int32_t valueMinimum, int32_t valueMaximum, uint8_t dataLocation[]);
+			// Set Axis Values
+			void setXAxis(int32_t value);
+			void setYAxis(int32_t value);
+			void setZAxis(int32_t value);
+			void setRxAxis(int32_t value);
+			void setRyAxis(int32_t value);
+			void setRzAxis(int32_t value);
 
-public:
-    Joystick_(
-        uint8_t hidReportId = JOYSTICK_DEFAULT_REPORT_ID,
-        uint8_t joystickType = JOYSTICK_TYPE_JOYSTICK,
-        uint8_t buttonCount = JOYSTICK_DEFAULT_BUTTON_COUNT,
-        uint8_t hatSwitchCount = JOYSTICK_DEFAULT_HATSWITCH_COUNT,
-        uint8_t includeAxisFlags = 255,
-        uint8_t includeSimulatorFlags = 255,
-        bool initAutoSendState = false);
-    
-    // Set Range Functions
-    inline void setXAxisRange(int32_t minimum, int32_t maximum)
-    {
-        _xAxisMinimum = minimum;
-        _xAxisMaximum = maximum;
-    }
-    inline void setYAxisRange(int32_t minimum, int32_t maximum)
-    {
-        _yAxisMinimum = minimum;
-        _yAxisMaximum = maximum;
-    }
-    inline void setZAxisRange(int32_t minimum, int32_t maximum)
-    {
-        _zAxisMinimum = minimum;
-        _zAxisMaximum = maximum;
-    }
-    inline void setRxAxisRange(int32_t minimum, int32_t maximum)
-    {
-        _rxAxisMinimum = minimum;
-        _rxAxisMaximum = maximum;
-    }
-    inline void setRyAxisRange(int32_t minimum, int32_t maximum)
-    {
-        _ryAxisMinimum = minimum;
-        _ryAxisMaximum = maximum;
-    }
-    inline void setRzAxisRange(int32_t minimum, int32_t maximum)
-    {
-        _rzAxisMinimum = minimum;
-        _rzAxisMaximum = maximum;
-    }
-    inline void setRudderRange(int32_t minimum, int32_t maximum)
-    {
-        _rudderMinimum = minimum;
-        _rudderMaximum = maximum;
-    }
-    inline void setThrottleRange(int32_t minimum, int32_t maximum)
-    {
-        _throttleMinimum = minimum;
-        _throttleMaximum = maximum;
-    }
-    inline void setAcceleratorRange(int32_t minimum, int32_t maximum)
-    {
-        _acceleratorMinimum = minimum;
-        _acceleratorMaximum = maximum;
-    }
-    inline void setBrakeRange(int32_t minimum, int32_t maximum)
-    {
-        _brakeMinimum = minimum;
-        _brakeMaximum = maximum;
-    }
-    inline void setSteeringRange(int32_t minimum, int32_t maximum)
-    {
-        _steeringMinimum = minimum;
-        _steeringMaximum = maximum;
-    }
+			// Set Simulation Values
+			void setRudder(int32_t value);
+			void setThrottle(int32_t value);
+			void setAccelerator(int32_t value);
+			void setBrake(int32_t value);
+			void setSteering(int32_t value);
+		#endif
 
-    // Set Axis Values
-    void setXAxis(int32_t value);
-    void setYAxis(int32_t value);
-    void setZAxis(int32_t value);
-    void setRxAxis(int32_t value);
-    void setRyAxis(int32_t value);
-    void setRzAxis(int32_t value);
+		void setButton(uint8_t button, uint8_t value);
+		void pressButton(uint8_t button);
+		void releaseButton(uint8_t button);
+		#ifndef Joystick_DISABLE_HATSWITCH
+			void setHatSwitch(int8_t hatSwitch, int16_t value);
+		#endif
 
-    // Set Simulation Values
-    void setRudder(int32_t value);
-    void setThrottle(int32_t value);
-    void setAccelerator(int32_t value);
-    void setBrake(int32_t value);
-    void setSteering(int32_t value);
-
-    void setButton(uint8_t button, uint8_t value);
-    void pressButton(uint8_t button);
-    void releaseButton(uint8_t button);
-
-    void setHatSwitch(int8_t hatSwitch, int16_t value);
-
-    int sendState();
+		int sendState();
 };
 
 #endif // !defined(_USING_DYNAMIC_HID)
