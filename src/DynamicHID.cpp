@@ -101,10 +101,10 @@ return false;
 	return true;
 }
 
-int DynamicHID_::SendReport(const void* data, int len)
+int DynamicHID_::SendReport(const void* data, int len, u8 timeout = 9)
 {
 	#ifdef USBCore_HAS_SEND2
-		return USB_Send2(pluggedEndpoint | TRANSFER_RELEASE, data, len, 9);
+		return USB_Send2(pluggedEndpoint | TRANSFER_RELEASE, data, len, timeout);
 	#else
 		return USB_Send(pluggedEndpoint | TRANSFER_RELEASE, data, len);
 	#endif

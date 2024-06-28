@@ -237,7 +237,7 @@ class Joystick_ {
 			void setHatSwitch(int8_t hatSwitch, int16_t value);
 		#endif
 
-		int sendState();
+		int sendState(u8 timeout = 9);
 };
 
 #endif // !defined(_USING_DYNAMIC_HID)

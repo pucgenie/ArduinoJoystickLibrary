@@ -126,7 +126,7 @@ bool Joystick_::begin(const uint8_t hidReportId, const uint8_t joystickType) {
 		const uint8_t axisCount = getBitCounts(_includeAxisFlags), simulationCount = getBitCounts(_includeSimulatorFlags);
 	#endif
 
-	// TODO: It's a struct with multiple VLAs. Good luck.
+	// TODO: It's a struct with multiple variable fields. Good luck.
 	uint8_t tempHidReportDescriptor[142];
 	int hidReportDescriptorSize = 0;
 
@@ -659,7 +659,7 @@ uint8_t Joystick_::buildAndSetSimulationValue(bool includeValue, int32_t value, 
 	return buildAndSet16BitValue(includeValue, value, valueMinimum, valueMaximum, JOYSTICK_SIMULATOR_MINIMUM, JOYSTICK_SIMULATOR_MAXIMUM, dataLocation);
 }
 
-int Joystick_::sendState()
+int Joystick_::sendState(u8 timeout)
 {
 	#if !defined(Joystick_DISABLE_AXISES) || !defined(Joystick_DISABLE_HATSWITCH)
 		int index = 1 + BUTTONVALUES_SIZE(_buttonCount);
@@ -706,6 +706,7 @@ int Joystick_::sendState()
 		#else
 			_hidReportSize
 		#endif
+		, timeout
 	);
 }
 
